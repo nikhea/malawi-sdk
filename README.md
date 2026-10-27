@@ -1,4 +1,4 @@
-# @malawi/store-sdk
+# @nikhea/store-sdk
 
 Typed TypeScript client for the **Malawi Store** e-commerce API — catalog,
 cart, checkout, Stripe payments, wishlist, reviews, auth, and the full admin
@@ -15,13 +15,13 @@ surface.
 ## Install
 
 ```bash
-npm install @malawi/store-sdk
+npm install @nikhea/store-sdk
 ```
 
 ## Quick start
 
 ```ts
-import { MalawiStore } from "@malawi/store-sdk";
+import { MalawiStore } from "@nikhea/store-sdk";
 
 const store = new MalawiStore({
   baseUrl: "https://shop.malawi.mw/api/v1",
@@ -253,7 +253,7 @@ Every failure is a `MalawiStoreError` with a stable `code`, the HTTP `status`,
 and the API's `X-Request-ID` when available.
 
 ```ts
-import { isMalawiStoreError } from "@malawi/store-sdk";
+import { isMalawiStoreError } from "@nikhea/store-sdk";
 
 try {
   await store.products.get("missing");
@@ -295,7 +295,7 @@ edge function or a separate service, the SDK ships a dependency-free verifier
 built on Web Crypto:
 
 ```ts
-import { constructStripeEvent, verifyStripeSignature } from "@malawi/store-sdk";
+import { constructStripeEvent, verifyStripeSignature } from "@nikhea/store-sdk";
 
 // Edge function / Node handler
 const payload = await request.text(); // raw body, never re-stringified

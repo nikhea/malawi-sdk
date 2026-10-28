@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-28
+
+### Added
+
+- `relevance` as a `ProductSort` value for `products.list` and
+  `products.listPage`, matching the API's default full-text ranking when
+  `q` is set.
+
+### Changed
+
+- `q` is documented as full-text search with a substring fallback instead
+  of plain substring matching.
+
 ## [0.1.0] - 2026-10-27
 
 ### Added

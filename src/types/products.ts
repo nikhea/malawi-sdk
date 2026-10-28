@@ -1,8 +1,8 @@
-import type { PageParams } from "./common.js";
+import type { PageParams, Paginated } from "./common.js";
 
 /**
- * A product (SPU). Prices are integer minor units — tambala:
- * `12500` means K125.00. Never use floats for money.
+ * A product (SPU). Prices are integer USD cents:
+ * `12500` means $125.00. Never use floats for money.
  */
 export interface Product {
   id: string;
@@ -26,6 +26,9 @@ export interface ProductVariantView {
   sku: string;
   price_cents: number;
   is_active: boolean;
+  /** Sellable units: on-hand minus active reservations. */
+  available: number;
+  in_stock: boolean;
 }
 
 /** The storefront product page: product plus its sellable SKUs. */
@@ -34,11 +37,39 @@ export interface ProductDetail {
   variants: ProductVariantView[];
 }
 
+export type ProductSort =
+  | "name_asc"
+  | "name_desc"
+  | "price_asc"
+  | "price_desc"
+  | "newest"
+  | "oldest"
+  | "rating_asc"
+  | "rating_desc";
+
 export interface ListProductsParams extends PageParams {
+  /** Case-insensitive substring over name, description and slug. */
+  q?: string;
   category_id?: string;
+  category_slug?: string;
+  min_price_cents?: number;
+  max_price_cents?: number;
+  /** true = in stock; false = out of stock only. */
+  in_stock?: boolean;
+  /** Active variant name, e.g. XS, M, XL. */
+  size?: string;
+  /** 0-5; products without reviews are excluded when set above 0. */
+  min_rating?: number;
+  /** RFC3339 timestamp or YYYY-MM-DD. */
+  created_after?: string;
+  created_before?: string;
   /** Defaults to `true` on the API. */
   active_only?: boolean;
+  sort?: ProductSort;
 }
+
+/** Raw paged products envelope returned by `listPage`. */
+export type ProductListResponse = Paginated<Product>;
 
 export interface CreateProductInput {
   category_id?: string;
@@ -46,9 +77,9 @@ export interface CreateProductInput {
   /** Generated from the name when omitted. */
   slug?: string;
   description?: string;
-  /** Minor units (tambala). */
+  /** USD cents (12500 = $125.00). */
   price_cents?: number;
-  /** Defaults to MWK on the API. */
+  /** Defaults to USD on the API. */
   currency?: string;
   image_url?: string;
 }

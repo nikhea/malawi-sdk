@@ -86,6 +86,86 @@ describe("MalawiStore", () => {
     expect(url).not.toContain("offset");
   });
 
+  it("serializes product filters and returns paged metadata", async () => {
+    const meta = {
+      page: 2,
+      limit: 10,
+      offset: 10,
+      total: 41,
+      total_pages: 5,
+      has_next: true,
+      has_prev: true,
+    };
+    const recorder = recordingFetch(() =>
+      jsonResponse({ data: [{ id: "p1" }], meta }),
+    );
+    const store = new MalawiStore({ baseUrl: BASE, fetch: recorder.fetch });
+
+    const page = await store.products.listPage({
+      q: "dress",
+      category_slug: "dresses",
+      min_price_cents: 1000,
+      max_price_cents: 5000,
+      in_stock: true,
+      size: "XL",
+      min_rating: 4,
+      created_after: "2026-01-01",
+      created_before: "2026-12-31",
+      active_only: false,
+      sort: "price_desc",
+      page: 2,
+      limit: 10,
+    });
+
+    const url = new URL(recorder.calls[0]?.url ?? "");
+    expect(url.pathname).toBe("/api/v1/products");
+    expect(url.searchParams.get("q")).toBe("dress");
+    expect(url.searchParams.get("category_slug")).toBe("dresses");
+    expect(url.searchParams.get("min_price_cents")).toBe("1000");
+    expect(url.searchParams.get("max_price_cents")).toBe("5000");
+    expect(url.searchParams.get("in_stock")).toBe("true");
+    expect(url.searchParams.get("size")).toBe("XL");
+    expect(url.searchParams.get("min_rating")).toBe("4");
+    expect(url.searchParams.get("created_after")).toBe("2026-01-01");
+    expect(url.searchParams.get("created_before")).toBe("2026-12-31");
+    expect(url.searchParams.get("active_only")).toBe("false");
+    expect(url.searchParams.get("sort")).toBe("price_desc");
+    expect(url.searchParams.get("page")).toBe("2");
+    expect(page.meta.total).toBe(41);
+    expect(page.data).toEqual([{ id: "p1" }]);
+  });
+
+  it("serializes category filters and returns paged metadata", async () => {
+    const meta = {
+      page: 1,
+      limit: 10,
+      offset: 0,
+      total: 5,
+      total_pages: 1,
+      has_next: false,
+      has_prev: false,
+    };
+    const recorder = recordingFetch(() =>
+      jsonResponse({ data: [{ id: "c1" }], meta }),
+    );
+    const store = new MalawiStore({ baseUrl: BASE, fetch: recorder.fetch });
+
+    const page = await store.categories.listPage({
+      q: "dress",
+      root_only: true,
+      has_products: true,
+      sort: "product_count_desc",
+      limit: 10,
+    });
+
+    const url = new URL(recorder.calls[0]?.url ?? "");
+    expect(url.searchParams.get("q")).toBe("dress");
+    expect(url.searchParams.get("root_only")).toBe("true");
+    expect(url.searchParams.get("has_products")).toBe("true");
+    expect(url.searchParams.get("sort")).toBe("product_count_desc");
+    expect(page.meta.total).toBe(5);
+  });
+
   it("handles 204 responses", async () => {
     const recorder = recordingFetch(() => emptyResponse());
     const store = new MalawiStore({

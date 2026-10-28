@@ -2,7 +2,8 @@ export type PaymentStatus = "pending" | "succeeded" | "failed" | "cancelled";
 
 /**
  * A Stripe payment intent. `amount_cents` is the charged USD amount;
- * `order_amount_cents` preserves the source MWK total.
+ * `order_amount_cents` preserves the source order total (USD cents, or
+ * tambala for legacy MWK orders).
  */
 export interface Payment {
   id: string;

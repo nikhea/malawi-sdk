@@ -304,6 +304,13 @@ const cases: Case[] = [
     path: "/payments/intents",
     body: { order_id: "o1" },
   },
+  {
+    name: "payments.createCheckoutSession",
+    run: (s) => s.payments.createCheckoutSession("o1"),
+    method: "POST",
+    path: "/payments/checkout-sessions",
+    body: { order_id: "o1" },
+  },
 
   // wishlist
   {

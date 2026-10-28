@@ -120,7 +120,7 @@ several parallel queries does not rotate the token multiple times.
 | `store.cart`          | Get, add, update quantity, remove, clear                            |
 | `store.inventory`     | Stock lookup and admin set/reserve/release/confirm                  |
 | `store.orders`        | Checkout, list, get, cancel                                         |
-| `store.payments`      | Stripe payment intent creation                                      |
+| `store.payments`      | Stripe payment intents and hosted Checkout sessions                 |
 | `store.wishlist`      | List, add, remove                                                   |
 | `store.reviews`       | Product summary, create, edit, delete, admin moderation             |
 
@@ -210,6 +210,10 @@ const order = await store.orders.checkout();
 // Create a Stripe intent and confirm it with Stripe.js
 const payment = await store.payments.createIntent(order.id);
 // stripe.confirmCardPayment(payment.client_secret, { … })
+
+// Or send the customer to Stripe's hosted payment page
+const checkout = await store.payments.createCheckoutSession(order.id);
+window.location.assign(checkout.url);
 ```
 
 ### Orders

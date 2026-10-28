@@ -162,6 +162,30 @@ console.log(detail.variants);            // sellable SKUs
 const skus = await store.variants.list(detail.product.id);
 ```
 
+For paginated grids use `listPage()`, which returns `{ data, meta }`:
+
+```ts
+const page = await store.products.listPage({
+  q: "dress",
+  category_slug: "dresses",
+  min_price_cents: 1_000_00,
+  max_price_cents: 9_000_00,
+  in_stock: true,
+  size: "XL",
+  min_rating: 4,
+  sort: "price_desc",
+  page: 2,
+  limit: 24,
+});
+
+page.meta; // page, limit, offset, total, total_pages, has_next, has_prev
+```
+
+Categories support `q`, `parent_id`, `root_only`, `has_products`, `sort`,
+`page`, `limit` and `offset` through `categories.list()` or
+`categories.listPage()`. `page` wins over `offset`; the API defaults to 20
+rows and caps a page at 100.
+
 Prices are integer **minor units** (tambala): `12500` means `K125.00`. Never
 convert to floating point for arithmetic.
 

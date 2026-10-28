@@ -2,7 +2,9 @@ import type { HttpClient } from "../http.js";
 import { segment } from "../path.js";
 import type {
   Category,
+  CategoryListResponse,
   CreateCategoryInput,
+  ListCategoriesParams,
   StatusResponse,
   UpdateCategoryInput,
 } from "../types/index.js";
@@ -12,9 +14,37 @@ export class CategoriesResource {
   constructor(private readonly http: HttpClient) {}
 
   /** Public taxonomy, flat and ordered by name. */
-  list(): Promise<Category[]> {
+  list(params: ListCategoriesParams = {}): Promise<Category[]> {
     return this.http.request<Category[]>("GET", "/categories", {
+      query: {
+        q: params.q,
+        parent_id: params.parent_id,
+        root_only: params.root_only,
+        has_products: params.has_products,
+        sort: params.sort,
+        page: params.page,
+        limit: params.limit,
+        offset: params.offset,
+      },
       skipAuth: true,
+    });
+  }
+
+  /** Same filters as `list`, plus the `meta` paging counters. */
+  listPage(params: ListCategoriesParams = {}): Promise<CategoryListResponse> {
+    return this.http.request<CategoryListResponse>("GET", "/categories", {
+      query: {
+        q: params.q,
+        parent_id: params.parent_id,
+        root_only: params.root_only,
+        has_products: params.has_products,
+        sort: params.sort,
+        page: params.page,
+        limit: params.limit,
+        offset: params.offset,
+      },
+      skipAuth: true,
+      unwrap: false,
     });
   }
 

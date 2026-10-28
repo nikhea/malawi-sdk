@@ -5,6 +5,7 @@ import type {
   ListProductsParams,
   Product,
   ProductDetail,
+  ProductListResponse,
   StatusResponse,
   UpdateProductInput,
 } from "../types/index.js";
@@ -20,12 +21,48 @@ export class ProductsResource {
   list(params: ListProductsParams = {}): Promise<Product[]> {
     return this.http.request<Product[]>("GET", "/products", {
       query: {
+        q: params.q,
         category_id: params.category_id,
+        category_slug: params.category_slug,
+        min_price_cents: params.min_price_cents,
+        max_price_cents: params.max_price_cents,
+        in_stock: params.in_stock,
+        size: params.size,
+        min_rating: params.min_rating,
+        created_after: params.created_after,
+        created_before: params.created_before,
         active_only: params.active_only,
+        sort: params.sort,
+        page: params.page,
         limit: params.limit,
         offset: params.offset,
       },
       skipAuth: true,
+    });
+  }
+
+  /** Same filters as `list`, plus the `meta` paging counters. */
+  listPage(params: ListProductsParams = {}): Promise<ProductListResponse> {
+    return this.http.request<ProductListResponse>("GET", "/products", {
+      query: {
+        q: params.q,
+        category_id: params.category_id,
+        category_slug: params.category_slug,
+        min_price_cents: params.min_price_cents,
+        max_price_cents: params.max_price_cents,
+        in_stock: params.in_stock,
+        size: params.size,
+        min_rating: params.min_rating,
+        created_after: params.created_after,
+        created_before: params.created_before,
+        active_only: params.active_only,
+        sort: params.sort,
+        page: params.page,
+        limit: params.limit,
+        offset: params.offset,
+      },
+      skipAuth: true,
+      unwrap: false,
     });
   }
 

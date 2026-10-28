@@ -189,8 +189,9 @@ rows and caps a page at 100.
 Variant rows include `available` (on-hand minus reservations) and `in_stock`,
 both in the product detail and `/products/:id/variants` responses.
 
-Prices are integer **minor units** (tambala): `12500` means `K125.00`. Never
-convert to floating point for arithmetic.
+Prices are integer **USD cents**: `12500` means `$125.00`. Never convert to
+floating point for arithmetic. Historical orders may still carry MWK
+tambala; the API converts those at charge time.
 
 ### Cart and checkout
 
@@ -241,7 +242,7 @@ const product = await store.products.create({
   name: "Sunseed Cooking Oil 2L",
   category_id: categoryId,
   price_cents: 12500,
-  currency: "MWK",
+  currency: "USD",
 });
 
 await store.products.update(product.id, { is_active: false });

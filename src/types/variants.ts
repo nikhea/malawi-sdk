@@ -1,4 +1,4 @@
-/** A sellable SKU. Prices are absolute minor units (tambala). */
+/** A sellable SKU. Prices are absolute USD cents. */
 export interface Variant {
   id: string;
   product_id: string;

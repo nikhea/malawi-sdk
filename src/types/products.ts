@@ -1,8 +1,8 @@
 import type { PageParams, Paginated } from "./common.js";
 
 /**
- * A product (SPU). Prices are integer minor units — tambala:
- * `12500` means K125.00. Never use floats for money.
+ * A product (SPU). Prices are integer USD cents:
+ * `12500` means $125.00. Never use floats for money.
  */
 export interface Product {
   id: string;
@@ -77,9 +77,9 @@ export interface CreateProductInput {
   /** Generated from the name when omitted. */
   slug?: string;
   description?: string;
-  /** Minor units (tambala). */
+  /** USD cents (12500 = $125.00). */
   price_cents?: number;
-  /** Defaults to MWK on the API. */
+  /** Defaults to USD on the API. */
   currency?: string;
   image_url?: string;
 }

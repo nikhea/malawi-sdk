@@ -18,3 +18,11 @@ export interface Payment {
   /** ISO-8601 timestamp. */
   created_at: string;
 }
+
+/** A Stripe-hosted Checkout page for an order. */
+export interface CheckoutSession {
+  id: string;
+  order_id: string;
+  url: string;
+  expires_at: number;
+}

@@ -1,5 +1,5 @@
 {
-  "name": "@nikhea/store-sdk",
+  "name": "@malawistore/store-sdk",
   "version": "0.1.0",
   "description": "TypeScript SDK for the Malawi Store e-commerce API",
   "keywords": [

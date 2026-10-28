@@ -26,6 +26,9 @@ export interface ProductVariantView {
   sku: string;
   price_cents: number;
   is_active: boolean;
+  /** Sellable units: on-hand minus active reservations. */
+  available: number;
+  in_stock: boolean;
 }
 
 /** The storefront product page: product plus its sellable SKUs. */

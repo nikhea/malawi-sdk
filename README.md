@@ -186,6 +186,9 @@ Categories support `q`, `parent_id`, `root_only`, `has_products`, `sort`,
 `categories.listPage()`. `page` wins over `offset`; the API defaults to 20
 rows and caps a page at 100.
 
+Variant rows include `available` (on-hand minus reservations) and `in_stock`,
+both in the product detail and `/products/:id/variants` responses.
+
 Prices are integer **minor units** (tambala): `12500` means `K125.00`. Never
 convert to floating point for arithmetic.
 

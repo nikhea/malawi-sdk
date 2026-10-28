@@ -6,6 +6,9 @@ export interface Variant {
   sku: string;
   price_cents: number;
   is_active: boolean;
+  /** Sellable units: on-hand minus active reservations. */
+  available: number;
+  in_stock: boolean;
   /** ISO-8601 timestamp. */
   created_at: string;
 }

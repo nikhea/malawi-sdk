@@ -251,6 +251,11 @@ await store.inventory.setStock({ product_id: product.id, qty: 50 });
 
 await store.users.setRole(userId, { role: "admin" });
 await store.reviews.deleteAny(reviewId); // moderation
+
+// Admin user directory: filters + pagination
+const users = await store.users.list({ role: "customer", q: "aisha", sort: "newest" });
+const page = await store.users.listPage({ email_verified: false, page: 1, limit: 50 });
+page.meta.total; // matching accounts
 ```
 
 ### Image uploads

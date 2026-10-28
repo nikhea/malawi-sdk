@@ -45,10 +45,15 @@ export type ProductSort =
   | "newest"
   | "oldest"
   | "rating_asc"
-  | "rating_desc";
+  | "rating_desc"
+  | "relevance";
 
 export interface ListProductsParams extends PageParams {
-  /** Case-insensitive substring over name, description and slug. */
+  /**
+   * Full-text search over name, description and slug. Word prefixes match
+   * ("cook" finds "cooking"); the API falls back to substring search when
+   * full-text finds nothing.
+   */
   q?: string;
   category_id?: string;
   category_slug?: string;

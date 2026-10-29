@@ -44,7 +44,7 @@ export interface StatusResponse {
 export interface PageParams {
   /** 1-based page. Wins over `offset` when both are sent. */
   page?: number;
-  /** Page size. The API defaults to 20 and caps at 100. */
+  /** Page size. Storefront/shopper lists default to 12; admin user lists default to 20. Capped at 100. */
   limit?: number;
   /** Number of rows to skip. */
   offset?: number;

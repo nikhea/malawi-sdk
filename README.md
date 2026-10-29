@@ -183,8 +183,32 @@ page.meta; // page, limit, offset, total, total_pages, has_next, has_prev
 
 Categories support `q`, `parent_id`, `root_only`, `has_products`, `sort`,
 `page`, `limit` and `offset` through `categories.list()` or
-`categories.listPage()`. `page` wins over `offset`; the API defaults to 20
-rows and caps a page at 100.
+`categories.listPage()`. `page` wins over `offset`; storefront and shopper
+lists (products, carts, categories, orders, reviews and wishlists) default to
+12 rows. Every page is capped at 100.
+
+The shopper lists expose the same paging envelope:
+
+```ts
+const cart = await store.cart.getPage({ page: 1, sort: "newest" });
+cart.data.items; // current page; subtotal still covers the whole cart
+cart.meta;       // line-level page counters
+
+const orders = await store.orders.listPage({
+  status: "paid",
+  created_after: "2026-01-01",
+  sort: "total_desc",
+});
+const wishlist = await store.wishlist.listPage({ q: "oil", sort: "price_asc" });
+
+const reviews = await store.reviews.summary(productId, {
+  rating: 5,
+  sort: "highest",
+  page: 1,
+  limit: 12,
+});
+reviews.meta; // filtered review page counters
+```
 
 Variant rows include `available` (on-hand minus reservations) and `in_stock`,
 both in the product detail and `/products/:id/variants` responses.

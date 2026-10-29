@@ -1,14 +1,43 @@
 import type { HttpClient } from "../http.js";
 import { segment } from "../path.js";
-import type { StatusResponse, WishlistItem } from "../types/index.js";
+import type {
+  ListWishlistParams,
+  StatusResponse,
+  WishlistItem,
+  WishlistListResponse,
+} from "../types/index.js";
 
 /** Requires authentication. */
 export class WishlistResource {
   constructor(private readonly http: HttpClient) {}
 
-  /** Newest first. */
-  list(): Promise<WishlistItem[]> {
-    return this.http.request<WishlistItem[]>("GET", "/wishlist");
+  /** Newest first (paging meta is dropped). */
+  list(params: ListWishlistParams = {}): Promise<WishlistItem[]> {
+    return this.http.request<WishlistItem[]>("GET", "/wishlist", {
+      query: {
+        q: params.q,
+        category_id: params.category_id,
+        sort: params.sort,
+        page: params.page,
+        limit: params.limit,
+        offset: params.offset,
+      },
+    });
+  }
+
+  /** Same filters as `list`, plus the `meta` paging counters. */
+  listPage(params: ListWishlistParams = {}): Promise<WishlistListResponse> {
+    return this.http.request<WishlistListResponse>("GET", "/wishlist", {
+      query: {
+        q: params.q,
+        category_id: params.category_id,
+        sort: params.sort,
+        page: params.page,
+        limit: params.limit,
+        offset: params.offset,
+      },
+      unwrap: false,
+    });
   }
 
   /** Idempotent: re-hearting succeeds silently. */

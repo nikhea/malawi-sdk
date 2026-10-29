@@ -1,14 +1,40 @@
 import type { HttpClient } from "../http.js";
 import { segment } from "../path.js";
-import type { AddCartItemInput, Cart } from "../types/index.js";
+import type { AddCartItemInput, Cart, CartResponse, ListCartParams } from "../types/index.js";
 
 /** Requires authentication. There is one active cart per user. */
 export class CartResource {
   constructor(private readonly http: HttpClient) {}
 
-  /** Active cart, created empty on first use. */
-  get(): Promise<Cart> {
-    return this.http.request<Cart>("GET", "/cart");
+  /** Active cart, created empty on first use (paging meta is dropped). */
+  get(params: ListCartParams = {}): Promise<Cart> {
+    return this.http.request<Cart>("GET", "/cart", {
+      query: {
+        q: params.q,
+        product_id: params.product_id,
+        variant_id: params.variant_id,
+        sort: params.sort,
+        page: params.page,
+        limit: params.limit,
+        offset: params.offset,
+      },
+    });
+  }
+
+  /** Same as `get`, plus the `meta` paging counters. */
+  getPage(params: ListCartParams = {}): Promise<CartResponse> {
+    return this.http.request<CartResponse>("GET", "/cart", {
+      query: {
+        q: params.q,
+        product_id: params.product_id,
+        variant_id: params.variant_id,
+        sort: params.sort,
+        page: params.page,
+        limit: params.limit,
+        offset: params.offset,
+      },
+      unwrap: false,
+    });
   }
 
   /** Validates against the catalog and snapshots the current price. */

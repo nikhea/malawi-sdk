@@ -15,6 +15,7 @@ interface Case {
   run: (store: MalawiStore) => Promise<unknown>;
   method: string;
   path: string;
+  query?: string;
   body?: unknown;
 }
 
@@ -204,6 +205,13 @@ const cases: Case[] = [
   // cart
   { name: "cart.get", run: (s) => s.cart.get(), method: "GET", path: "/cart" },
   {
+    name: "cart.getPage",
+    run: (s) => s.cart.getPage({ page: 2, limit: 12 }),
+    method: "GET",
+    path: "/cart",
+    query: "page=2&limit=12",
+  },
+  {
     name: "cart.addItem",
     run: (s) => s.cart.addItem({ product_id: "p1", variant_id: "v1", qty: 2 }),
     method: "POST",
@@ -284,6 +292,13 @@ const cases: Case[] = [
     path: "/orders",
   },
   {
+    name: "orders.listPage",
+    run: (s) => s.orders.listPage({ status: "paid", limit: 12 }),
+    method: "GET",
+    path: "/orders",
+    query: "status=paid&limit=12",
+  },
+  {
     name: "orders.get",
     run: (s) => s.orders.get("o1"),
     method: "GET",
@@ -320,6 +335,13 @@ const cases: Case[] = [
     path: "/wishlist",
   },
   {
+    name: "wishlist.listPage",
+    run: (s) => s.wishlist.listPage({ sort: "name_asc", limit: 12 }),
+    method: "GET",
+    path: "/wishlist",
+    query: "sort=name_asc&limit=12",
+  },
+  {
     name: "wishlist.add",
     run: (s) => s.wishlist.add("p1"),
     method: "POST",
@@ -336,9 +358,10 @@ const cases: Case[] = [
   // reviews
   {
     name: "reviews.summary",
-    run: (s) => s.reviews.summary("p1"),
+    run: (s) => s.reviews.summary("p1", { rating: 5, sort: "highest", limit: 12 }),
     method: "GET",
     path: "/products/p1/reviews",
+    query: "rating=5&sort=highest&limit=12",
   },
   {
     name: "reviews.create",
@@ -376,7 +399,7 @@ function responseFor(url: string): Response {
 }
 
 describe("resource endpoints", () => {
-  it.each(cases)("$name", async ({ run, method, path, body }) => {
+  it.each(cases)("$name", async ({ run, method, path, query, body }) => {
     const recorder = recordingFetch(responseFor);
     const store = new MalawiStore({
       baseUrl: BASE,
@@ -390,7 +413,7 @@ describe("resource endpoints", () => {
 
     expect(recorder.calls).toHaveLength(1);
     const [call] = recorder.calls;
-    expect(call?.url).toBe(`${BASE}${path}`);
+    expect(call?.url).toBe(`${BASE}${path}${query ? `?${query}` : ""}`);
     expect(call?.init.method).toBe(method);
 
     const isPublic =

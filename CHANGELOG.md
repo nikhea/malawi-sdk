@@ -6,6 +6,25 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-10-29
+
+### Added
+
+- `cart.getPage()` with line filters (`q`, `product_id`, `variant_id`), sorting,
+  and paging metadata; cart totals still cover every line.
+- `orders.listPage()` with status/currency/date/total filters and sorting.
+- `wishlist.listPage()` with product search, category filtering, and sorting.
+- Review filters and paging through `reviews.summary(productId, params)`.
+- `ListCartParams`, `ListOrdersParams`, `ListWishlistParams`,
+  `ListReviewsParams`, and `CartResponse` wire types.
+
+### Changed
+
+- Storefront and shopper lists default to 12 rows per page; the admin user
+  directory still defaults to 20. Every page remains capped at 100.
+- Existing `list()`, `get()`, and `summary()` methods now accept the same
+  optional query parameters without changing their return shapes.
+
 ## [0.1.1] - 2026-10-28
 
 ### Added

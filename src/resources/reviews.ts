@@ -2,6 +2,7 @@ import type { HttpClient } from "../http.js";
 import { segment } from "../path.js";
 import type {
   CreateReviewInput,
+  ListReviewsParams,
   Review,
   ReviewSummary,
   UpdateReviewInput,
@@ -10,12 +11,25 @@ import type {
 export class ReviewsResource {
   constructor(private readonly http: HttpClient) {}
 
-  /** Public aggregate plus the newest reviews for a product. */
-  summary(productId: string): Promise<ReviewSummary> {
+  /** Public aggregate plus one filtered review page (`summary.meta`). */
+  summary(
+    productId: string,
+    params: ListReviewsParams = {},
+  ): Promise<ReviewSummary> {
     return this.http.request<ReviewSummary>(
       "GET",
       `/products/${segment(productId)}/reviews`,
-      { skipAuth: true },
+      {
+        query: {
+          q: params.q,
+          rating: params.rating,
+          sort: params.sort,
+          page: params.page,
+          limit: params.limit,
+          offset: params.offset,
+        },
+        skipAuth: true,
+      },
     );
   }
 

@@ -2,7 +2,10 @@ import type { HttpClient } from "../http.js";
 import { segment } from "../path.js";
 import type {
   CreateReviewInput,
+  ListMyReviewsParams,
   ListReviewsParams,
+  MyReview,
+  MyReviewsResponse,
   Review,
   ReviewSummary,
   UpdateReviewInput,
@@ -31,6 +34,33 @@ export class ReviewsResource {
         skipAuth: true,
       },
     );
+  }
+
+  /** The caller's own reviews with product context (paging meta dropped). */
+  listMine(params: ListMyReviewsParams = {}): Promise<MyReview[]> {
+    return this.http.request<MyReview[]>("GET", "/reviews/me", {
+      query: {
+        sort: params.sort,
+        page: params.page,
+        limit: params.limit,
+        offset: params.offset,
+      },
+    });
+  }
+
+  /** Same as `listMine`, plus the `meta` paging counters. */
+  listMinePage(
+    params: ListMyReviewsParams = {},
+  ): Promise<MyReviewsResponse> {
+    return this.http.request<MyReviewsResponse>("GET", "/reviews/me", {
+      query: {
+        sort: params.sort,
+        page: params.page,
+        limit: params.limit,
+        offset: params.offset,
+      },
+      unwrap: false,
+    });
   }
 
   /** One review per user per product. */

@@ -6,6 +6,31 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Bulk admin writes: `products.bulkCreate()`, `products.bulkUpdate()`,
+  `products.bulkDelete()`, `variants.createBulk()`, `variants.updateBulk()`,
+  and `inventory.setStockBulk()`. Every method accepts `atomic`, `dryRun`,
+  and an optional `idempotencyKey`.
+- Bulk shopper writes: `cart.addItems()` (returns per-line results plus the
+  full updated cart), `wishlist.addBulk()`, and `wishlist.removeBulk()`.
+- Product gallery admin endpoints: `products.listImages()`,
+  `products.uploadImages()` (multi-file), `products.deleteImage()`, and
+  `products.setPrimaryImage()`.
+- `inventory.getStockByVariants()` batch availability read.
+- `reviews.listMine()` and `reviews.listMinePage()` for the caller's review
+  history.
+- `products.list()` / `listPage()` accept `ids` to restrict the page.
+- `BulkOptions`, `BulkResult`, `BulkResponse`, `BulkSummary`, and the new
+  bulk/gallery wire types are exported.
+
+### Fixed
+
+- `users.get()` now calls `GET /admin/users/{id}`. The previous `/users/{id}`
+  route does not exist (owners use `users.me()`; lookups are admin-only).
+- `ApiErrorCode` now includes `BULK_LIMIT_EXCEEDED`, `DUPLICATE_ITEM`, and
+  `IDEMPOTENCY_CONFLICT`.
+
 ## [0.1.3] - 2026-10-29
 
 ### Added

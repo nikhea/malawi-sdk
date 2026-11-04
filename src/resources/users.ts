@@ -15,8 +15,9 @@ export class UsersResource {
     return this.http.request<User>("GET", "/users/me");
   }
 
+  /** Admin only. There is no public `GET /users/{id}` — owners use `me()`. */
   get(id: string): Promise<User> {
-    return this.http.request<User>("GET", `/users/${segment(id)}`);
+    return this.http.request<User>("GET", `/admin/users/${segment(id)}`);
   }
 
   /** Admin only. User directory without envelope metadata. */

@@ -1,6 +1,14 @@
+import { idempotencyHeaders } from "../headers.js";
 import type { HttpClient } from "../http.js";
 import { segment } from "../path.js";
-import type { AddCartItemInput, Cart, CartResponse, ListCartParams } from "../types/index.js";
+import type {
+  AddCartItemInput,
+  BulkAddCartItemsInput,
+  BulkAddCartItemsResponse,
+  Cart,
+  CartResponse,
+  ListCartParams,
+} from "../types/index.js";
 
 /** Requires authentication. There is one active cart per user. */
 export class CartResource {
@@ -43,6 +51,23 @@ export class CartResource {
       body: input,
       retry: false,
     });
+  }
+
+  /**
+   * Adds up to MAX_BULK_ITEMS lines in one request. Per-line results carry
+   * the written line, plus the full updated cart.
+   */
+  addItems(input: BulkAddCartItemsInput): Promise<BulkAddCartItemsResponse> {
+    const { idempotencyKey, ...body } = input;
+    return this.http.request<BulkAddCartItemsResponse>(
+      "POST",
+      "/cart/items/bulk",
+      {
+        body,
+        headers: idempotencyHeaders(idempotencyKey),
+        retry: false,
+      },
+    );
   }
 
   /** `qty: 0` removes the line. */

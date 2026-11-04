@@ -1,4 +1,10 @@
-import type { PageParams, Paginated } from "./common.js";
+import type {
+  BulkOptions,
+  BulkResponse,
+  DryRunOptions,
+  PageParams,
+  Paginated,
+} from "./common.js";
 
 /** Catalog snapshot embedded in a wishlist item. */
 export interface WishlistProduct {
@@ -34,3 +40,16 @@ export interface ListWishlistParams extends PageParams {
 
 /** Raw paged wishlist envelope returned by `listPage`. */
 export type WishlistListResponse = Paginated<WishlistItem>;
+
+/** Body of `POST /wishlist/bulk` (the field is camelCase on the wire). */
+export interface BulkAddWishlistInput extends BulkOptions {
+  productIds: string[];
+}
+
+/** Body of `POST /wishlist/bulk-delete` (product ids, not wishlist row ids). */
+export interface BulkRemoveWishlistInput extends DryRunOptions {
+  ids: string[];
+}
+
+export type BulkAddWishlistResponse = BulkResponse<WishlistItem>;
+export type BulkRemoveWishlistResponse = BulkResponse<never>;

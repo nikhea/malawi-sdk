@@ -84,7 +84,7 @@ const cases: Case[] = [
     name: "users.get",
     run: (s) => s.users.get("u1"),
     method: "GET",
-    path: "/users/u1",
+    path: "/admin/users/u1",
   },
   {
     name: "users.setRole",
@@ -142,6 +142,13 @@ const cases: Case[] = [
     path: "/products",
   },
   {
+    name: "products.list ids",
+    run: (s) => s.products.list({ ids: ["p1", "p2"] }),
+    method: "GET",
+    path: "/products",
+    query: "ids=p1&ids=p2",
+  },
+  {
     name: "products.get",
     run: (s) => s.products.get("p1"),
     method: "GET",
@@ -173,6 +180,52 @@ const cases: Case[] = [
     method: "DELETE",
     path: "/admin/products/p1",
   },
+  {
+    name: "products.bulkCreate",
+    run: (s) =>
+      s.products.bulkCreate({
+        atomic: true,
+        items: [{ name: "Oil", price_cents: 12500 }],
+      }),
+    method: "POST",
+    path: "/admin/products/bulk",
+    body: { atomic: true, items: [{ name: "Oil", price_cents: 12500 }] },
+  },
+  {
+    name: "products.bulkUpdate",
+    run: (s) =>
+      s.products.bulkUpdate({
+        updates: [{ id: "p1", patch: { is_active: false } }],
+      }),
+    method: "PATCH",
+    path: "/admin/products/bulk",
+    body: { updates: [{ id: "p1", patch: { is_active: false } }] },
+  },
+  {
+    name: "products.bulkDelete",
+    run: (s) => s.products.bulkDelete({ ids: ["p1", "p2"], dryRun: true }),
+    method: "POST",
+    path: "/admin/products/bulk-delete",
+    body: { ids: ["p1", "p2"], dryRun: true },
+  },
+  {
+    name: "products.listImages",
+    run: (s) => s.products.listImages("p1"),
+    method: "GET",
+    path: "/admin/products/p1/images",
+  },
+  {
+    name: "products.deleteImage",
+    run: (s) => s.products.deleteImage("p1", "i1"),
+    method: "DELETE",
+    path: "/admin/products/p1/images/i1",
+  },
+  {
+    name: "products.setPrimaryImage",
+    run: (s) => s.products.setPrimaryImage("p1", "i1"),
+    method: "PUT",
+    path: "/admin/products/p1/images/i1/primary",
+  },
 
   // variants
   {
@@ -201,6 +254,26 @@ const cases: Case[] = [
     method: "DELETE",
     path: "/admin/variants/v1",
   },
+  {
+    name: "variants.createBulk",
+    run: (s) =>
+      s.variants.createBulk("p1", {
+        items: [{ name: "500ml", sku: "OIL-1" }],
+      }),
+    method: "POST",
+    path: "/products/p1/variants/bulk",
+    body: { items: [{ name: "500ml", sku: "OIL-1" }] },
+  },
+  {
+    name: "variants.updateBulk",
+    run: (s) =>
+      s.variants.updateBulk({
+        updates: [{ id: "v1", patch: { price_cents: 2500 } }],
+      }),
+    method: "PATCH",
+    path: "/admin/variants/bulk",
+    body: { updates: [{ id: "v1", patch: { price_cents: 2500 } }] },
+  },
 
   // cart
   { name: "cart.get", run: (s) => s.cart.get(), method: "GET", path: "/cart" },
@@ -217,6 +290,16 @@ const cases: Case[] = [
     method: "POST",
     path: "/cart/items",
     body: { product_id: "p1", variant_id: "v1", qty: 2 },
+  },
+  {
+    name: "cart.addItems",
+    run: (s) =>
+      s.cart.addItems({
+        items: [{ product_id: "p1", variant_id: "v1", qty: 2 }],
+      }),
+    method: "POST",
+    path: "/cart/items/bulk",
+    body: { items: [{ product_id: "p1", variant_id: "v1", qty: 2 }] },
   },
   {
     name: "cart.setQty",
@@ -246,11 +329,29 @@ const cases: Case[] = [
     path: "/admin/inventory/stock?product_id=p1&variant_id=v1",
   },
   {
+    name: "inventory.getStockByVariants",
+    run: (s) => s.inventory.getStockByVariants(["v1", "v2"]),
+    method: "GET",
+    path: "/admin/inventory/stock",
+    query: "variantIds=v1&variantIds=v2",
+  },
+  {
     name: "inventory.setStock",
     run: (s) => s.inventory.setStock({ product_id: "p1", qty: 10 }),
     method: "POST",
     path: "/admin/inventory/stock",
     body: { product_id: "p1", qty: 10 },
+  },
+  {
+    name: "inventory.setStockBulk",
+    run: (s) =>
+      s.inventory.setStockBulk({
+        atomic: true,
+        items: [{ product_id: "p1", qty: 10 }],
+      }),
+    method: "POST",
+    path: "/admin/inventory/stock/bulk",
+    body: { atomic: true, items: [{ product_id: "p1", qty: 10 }] },
   },
   {
     name: "inventory.reserve",
@@ -354,6 +455,20 @@ const cases: Case[] = [
     method: "DELETE",
     path: "/wishlist/p1",
   },
+  {
+    name: "wishlist.addBulk",
+    run: (s) => s.wishlist.addBulk({ productIds: ["p1", "p2"] }),
+    method: "POST",
+    path: "/wishlist/bulk",
+    body: { productIds: ["p1", "p2"] },
+  },
+  {
+    name: "wishlist.removeBulk",
+    run: (s) => s.wishlist.removeBulk({ ids: ["p1", "p2"], dryRun: true }),
+    method: "POST",
+    path: "/wishlist/bulk-delete",
+    body: { ids: ["p1", "p2"], dryRun: true },
+  },
 
   // reviews
   {
@@ -384,6 +499,20 @@ const cases: Case[] = [
     path: "/reviews/r1",
   },
   {
+    name: "reviews.listMine",
+    run: (s) => s.reviews.listMine({ sort: "highest", limit: 12 }),
+    method: "GET",
+    path: "/reviews/me",
+    query: "sort=highest&limit=12",
+  },
+  {
+    name: "reviews.listMinePage",
+    run: (s) => s.reviews.listMinePage({ page: 2 }),
+    method: "GET",
+    path: "/reviews/me",
+    query: "page=2",
+  },
+  {
     name: "reviews.deleteAny",
     run: (s) => s.reviews.deleteAny("r1"),
     method: "DELETE",
@@ -394,6 +523,9 @@ const cases: Case[] = [
 function responseFor(url: string): Response {
   if (url.includes("/auth/")) {
     return jsonResponse({ data: tokenPair() });
+  }
+  if (url.endsWith("/images")) {
+    return jsonResponse({ data: { images: [] } });
   }
   return jsonResponse({ data: null });
 }
@@ -436,6 +568,27 @@ describe("resource endpoints", () => {
       expect(bodyOf(call!.init)).toEqual(body);
       expect(headerOf(call!.init, "content-type")).toBe("application/json");
     }
+  });
+
+  it("sends Idempotency-Key for bulk writes without leaking it into the body", async () => {
+    const recorder = recordingFetch(responseFor);
+    const store = new MalawiStore({
+      baseUrl: BASE,
+      token: "access-token",
+      fetch: recorder.fetch,
+      retry: false,
+    });
+
+    await store.products.bulkCreate({
+      idempotencyKey: "key-123",
+      items: [{ name: "Oil", price_cents: 12500 }],
+    });
+
+    const [call] = recorder.calls;
+    expect(headerOf(call!.init, "idempotency-key")).toBe("key-123");
+    expect(bodyOf(call!.init)).toEqual({
+      items: [{ name: "Oil", price_cents: 12500 }],
+    });
   });
 
   it("omits Authorization for public and auth endpoints", async () => {

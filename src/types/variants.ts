@@ -1,3 +1,5 @@
+import type { BulkResponse, DryRunOptions } from "./common.js";
+
 /** A sellable SKU. Prices are absolute USD cents. */
 export interface Variant {
   id: string;
@@ -24,3 +26,19 @@ export interface UpdateVariantInput {
   price_cents?: number;
   is_active?: boolean;
 }
+
+export interface BulkCreateVariantsInput extends DryRunOptions {
+  items: CreateVariantInput[];
+}
+
+export interface BulkUpdateVariantItem {
+  id: string;
+  patch: UpdateVariantInput;
+}
+
+export interface BulkUpdateVariantsInput extends DryRunOptions {
+  updates: BulkUpdateVariantItem[];
+}
+
+export type BulkCreateVariantsResponse = BulkResponse<Variant>;
+export type BulkUpdateVariantsResponse = BulkResponse<Variant>;

@@ -115,14 +115,14 @@ several parallel queries does not rotate the token multiple times.
 | `store.auth`          | Register, login, refresh, logout, email verification, password reset |
 | `store.users`         | Current account, user lookup, role management (admin)               |
 | `store.categories`    | Taxonomy reads, admin CRUD, image upload                            |
-| `store.products`      | Catalog reads, admin CRUD, image upload                             |
-| `store.variants`      | SKU reads and admin CRUD                                            |
-| `store.cart`          | Get, add, update quantity, remove, clear                            |
-| `store.inventory`     | Stock lookup and admin set/reserve/release/confirm                  |
+| `store.products`      | Catalog reads, admin CRUD, bulk writes, image + gallery upload      |
+| `store.variants`      | SKU reads, admin CRUD, bulk create/update                           |
+| `store.cart`          | Get, add (single or bulk), update quantity, remove, clear           |
+| `store.inventory`     | Stock lookup (single or batch), bulk set, reserve/release/confirm   |
 | `store.orders`        | Checkout, list, get, cancel                                         |
 | `store.payments`      | Stripe payment intents and hosted Checkout sessions                 |
-| `store.wishlist`      | List, add, remove                                                   |
-| `store.reviews`       | Product summary, create, edit, delete, admin moderation             |
+| `store.wishlist`      | List, add, remove, bulk heart/unheart                               |
+| `store.reviews`       | Product summary, own history, create, edit, delete, moderation      |
 
 ### Auth
 
@@ -160,6 +160,9 @@ console.log(detail.product.price_cents); // 12500 → K125.00
 console.log(detail.variants);            // sellable SKUs
 
 const skus = await store.variants.list(detail.product.id);
+
+// Fetch a specific set of products (e.g. a "recently viewed" rail)
+const picked = await store.products.list({ ids: [id1, id2, id3] });
 ```
 
 For paginated grids use `listPage()`, which returns `{ data, meta }`:
@@ -208,6 +211,11 @@ const reviews = await store.reviews.summary(productId, {
   limit: 12,
 });
 reviews.meta; // filtered review page counters
+
+// The caller's own review history (with product context)
+const mine = await store.reviews.listMine({ sort: "newest" });
+const minePage = await store.reviews.listMinePage({ page: 1, limit: 12 });
+minePage.meta;
 ```
 
 Variant rows include `available` (on-hand minus reservations) and `in_stock`,
@@ -222,6 +230,18 @@ tambala; the API converts those at charge time.
 ```ts
 await store.cart.addItem({ product_id: "…", qty: 2 });
 await store.cart.addItem({ product_id: "…", variant_id: "…", qty: 1 });
+
+// Batch add: per-line results plus the full updated cart
+const bulk = await store.cart.addItems({
+  atomic: true,
+  items: [
+    { product_id: "…", qty: 2 },
+    { product_id: "…", variant_id: "…", qty: 1 },
+  ],
+});
+bulk.results; // [{ index, id, status, data, error? }]
+bulk.cart;    // no follow-up GET needed
+
 await store.cart.setQty("cart-line-id", 3);
 await store.cart.removeItem("cart-line-id");
 
@@ -255,6 +275,10 @@ await store.wishlist.add(productId);
 const wishlist = await store.wishlist.list();
 await store.wishlist.remove(productId); // product ID, not row ID
 
+// Batch heart / unheart (idempotent; already-hearted rows succeed)
+await store.wishlist.addBulk({ productIds: [id1, id2] });
+await store.wishlist.removeBulk({ ids: [id1, id2], dryRun: false });
+
 const summary = await store.reviews.summary(productId);
 await store.reviews.create(productId, { rating: 5, title: "Great", body: "…" });
 await store.reviews.update(reviewId, { rating: 4 });
@@ -280,6 +304,38 @@ await store.inventory.setStock({ product_id: product.id, qty: 50 });
 await store.users.setRole(userId, { role: "admin" });
 await store.reviews.deleteAny(reviewId); // moderation
 
+// Bulk product + variant + stock writes. Per-item failures stay inside
+// the 200 envelope; atomic rolls the whole batch back.
+await store.products.bulkCreate({ items: [draft1, draft2] });
+await store.products.bulkUpdate({
+  updates: [{ id: productId, patch: { is_active: false } }],
+});
+await store.products.bulkDelete({ ids: [id1, id2], dryRun: true });
+
+await store.variants.createBulk(product.id, { items: [sku1, sku2] });
+await store.variants.updateBulk({
+  updates: [{ id: skuId, patch: { price_cents: 2500 } }],
+});
+
+await store.inventory.setStockBulk({
+  atomic: true,
+  items: [
+    { product_id: id1, qty: 50 },
+    { product_id: id1, variant_id: skuId, qty: 20 },
+  ],
+});
+
+// Batch availability read; unknown ids land in `notFound`
+const stock = await store.inventory.getStockByVariants([skuId, otherSkuId]);
+stock.stock;
+stock.notFound;
+
+// Bulk writes accept an optional replay-safe key (24h window)
+await store.products.bulkCreate({
+  idempotencyKey: "catalog-import-2026-11-04",
+  items: [draft1, draft2],
+});
+
 // Admin user directory: filters + pagination
 const users = await store.users.list({ role: "customer", q: "aisha", sort: "newest" });
 const page = await store.users.listPage({ email_verified: false, page: 1, limit: 50 });
@@ -295,6 +351,12 @@ Cloudinary finishes. The method resolves as soon as the job is accepted.
 // Browser
 const file = fileInput.files![0];
 await store.products.uploadImage(productId, file);
+
+// Gallery: list, batch upload, reorder/primary, delete
+const images = await store.products.listImages(productId);
+await store.products.uploadImages(productId, [file, otherFile]); // up to 20
+await store.products.setPrimaryImage(productId, images[0].id);
+await store.products.deleteImage(productId, images[0].id);
 
 // Node: wrap a Buffer
 import { readFile } from "node:fs/promises";

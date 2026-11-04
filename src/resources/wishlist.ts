@@ -1,6 +1,11 @@
+import { idempotencyHeaders } from "../headers.js";
 import type { HttpClient } from "../http.js";
 import { segment } from "../path.js";
 import type {
+  BulkAddWishlistInput,
+  BulkAddWishlistResponse,
+  BulkRemoveWishlistInput,
+  BulkRemoveWishlistResponse,
   ListWishlistParams,
   StatusResponse,
   WishlistItem,
@@ -54,6 +59,39 @@ export class WishlistResource {
       "DELETE",
       `/wishlist/${segment(productId)}`,
       { retry: false },
+    );
+  }
+
+  /** Hearts up to MAX_BULK_ITEMS products; already-hearted rows succeed. */
+  addBulk(input: BulkAddWishlistInput): Promise<BulkAddWishlistResponse> {
+    const { idempotencyKey, ...body } = input;
+    return this.http.request<BulkAddWishlistResponse>(
+      "POST",
+      "/wishlist/bulk",
+      {
+        body,
+        headers: idempotencyHeaders(idempotencyKey),
+        retry: false,
+      },
+    );
+  }
+
+  /**
+   * Unhearts by product id. `dryRun` reports `wouldDelete` without
+   * writing; already-removed rows succeed.
+   */
+  removeBulk(
+    input: BulkRemoveWishlistInput,
+  ): Promise<BulkRemoveWishlistResponse> {
+    const { idempotencyKey, ...body } = input;
+    return this.http.request<BulkRemoveWishlistResponse>(
+      "POST",
+      "/wishlist/bulk-delete",
+      {
+        body,
+        headers: idempotencyHeaders(idempotencyKey),
+        retry: false,
+      },
     );
   }
 }

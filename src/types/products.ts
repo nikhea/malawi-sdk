@@ -1,4 +1,10 @@
-import type { PageParams, Paginated } from "./common.js";
+import type {
+  BulkResponse,
+  DryRunOptions,
+  BulkResult,
+  PageParams,
+  Paginated,
+} from "./common.js";
 
 /**
  * A product (SPU). Prices are integer USD cents:
@@ -31,10 +37,12 @@ export interface ProductVariantView {
   in_stock: boolean;
 }
 
-/** The storefront product page: product plus its sellable SKUs. */
+/** The storefront product page: product, its sellable SKUs, and gallery. */
 export interface ProductDetail {
   product: Product;
   variants: ProductVariantView[];
+  /** Gallery rows; queued uploads (empty url) are excluded. */
+  images: ProductImage[];
 }
 
 export type ProductSort =
@@ -55,6 +63,8 @@ export interface ListProductsParams extends PageParams {
    * full-text finds nothing.
    */
   q?: string;
+  /** Restrict to specific product ids (comma separated or repeated). */
+  ids?: string[];
   category_id?: string;
   category_slug?: string;
   min_price_cents?: number;
@@ -99,3 +109,48 @@ export interface UpdateProductInput {
   /** Unfile the product. Slugs are immutable. */
   clear_category?: boolean;
 }
+
+/** One product gallery image. `is_primary` mirrors the product's image_url. */
+export interface ProductImage {
+  id: string;
+  /** Empty while the upload is still queued. */
+  url: string;
+  position: number;
+  is_primary: boolean;
+  /** ISO-8601 timestamp. */
+  created_at: string;
+}
+
+/** Raw payload of the admin gallery list. */
+export interface ProductImageList {
+  images: ProductImage[];
+}
+
+/** Result of queuing a multi-file gallery upload (HTTP 202). */
+export interface UploadImagesResponse {
+  status: string;
+  queued: number;
+  failed: number;
+}
+
+export interface BulkCreateProductsInput extends DryRunOptions {
+  items: CreateProductInput[];
+}
+
+export interface BulkUpdateProductItem {
+  id: string;
+  patch: UpdateProductInput;
+}
+
+export interface BulkUpdateProductsInput extends DryRunOptions {
+  updates: BulkUpdateProductItem[];
+}
+
+export interface BulkDeleteProductsInput extends DryRunOptions {
+  ids: string[];
+}
+
+export type BulkProductResult = BulkResult<Product>;
+export type BulkCreateProductsResponse = BulkResponse<Product>;
+export type BulkUpdateProductsResponse = BulkResponse<Product>;
+export type BulkDeleteProductsResponse = BulkResponse<never>;

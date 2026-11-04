@@ -10,7 +10,7 @@ export type {
 } from "./http.js";
 export { buildQuery } from "./query.js";
 export type { QueryParams, QueryScalar, QueryValue } from "./query.js";
-export { createUploadForm } from "./upload.js";
+export { createUploadForm, createUploadFormMany } from "./upload.js";
 export type { UploadData, UploadFile } from "./upload.js";
 export {
   constructStripeEvent,

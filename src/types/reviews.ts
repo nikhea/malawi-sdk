@@ -1,4 +1,4 @@
-import type { PageParams, PaginationMeta } from "./common.js";
+import type { PageParams, Paginated, PaginationMeta } from "./common.js";
 
 export interface Review {
   id: string;
@@ -43,3 +43,33 @@ export interface UpdateReviewInput {
   title?: string;
   body?: string;
 }
+
+/** Catalog context attached to a review in the caller's own history. */
+export interface MyReviewProduct {
+  id: string;
+  name: string;
+  slug: string;
+  image_url?: string;
+}
+
+/** One of the caller's reviews, with product context. */
+export interface MyReview {
+  id: string;
+  user_id: string;
+  product_id: string;
+  rating: number;
+  title: string;
+  body: string;
+  /** ISO-8601 timestamp. */
+  created_at: string;
+  /** ISO-8601 timestamp. */
+  updated_at: string;
+  product: MyReviewProduct;
+}
+
+export interface ListMyReviewsParams extends PageParams {
+  sort?: ReviewSort;
+}
+
+/** Raw paged envelope returned by `listMinePage`. */
+export type MyReviewsResponse = Paginated<MyReview>;

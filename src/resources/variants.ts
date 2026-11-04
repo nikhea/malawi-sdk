@@ -1,6 +1,11 @@
+import { idempotencyHeaders } from "../headers.js";
 import type { HttpClient } from "../http.js";
 import { segment } from "../path.js";
 import type {
+  BulkCreateVariantsInput,
+  BulkCreateVariantsResponse,
+  BulkUpdateVariantsInput,
+  BulkUpdateVariantsResponse,
   CreateVariantInput,
   UpdateVariantInput,
   Variant,
@@ -41,6 +46,37 @@ export class VariantsResource {
       "DELETE",
       `/admin/variants/${segment(id)}`,
       { retry: false },
+    );
+  }
+
+  /** Admin only. Creates up to MAX_BULK_ITEMS SKUs for one product. */
+  createBulk(
+    productId: string,
+    input: BulkCreateVariantsInput,
+  ): Promise<BulkCreateVariantsResponse> {
+    const { idempotencyKey, ...body } = input;
+    return this.http.request<BulkCreateVariantsResponse>(
+      "POST",
+      `/products/${segment(productId)}/variants/bulk`,
+      {
+        body,
+        headers: idempotencyHeaders(idempotencyKey),
+        retry: false,
+      },
+    );
+  }
+
+  /** Admin only. Applies one partial patch per variant id. */
+  updateBulk(input: BulkUpdateVariantsInput): Promise<BulkUpdateVariantsResponse> {
+    const { idempotencyKey, ...body } = input;
+    return this.http.request<BulkUpdateVariantsResponse>(
+      "PATCH",
+      "/admin/variants/bulk",
+      {
+        body,
+        headers: idempotencyHeaders(idempotencyKey),
+        retry: false,
+      },
     );
   }
 }

@@ -1,4 +1,9 @@
-import type { PageParams, PaginationMeta } from "./common.js";
+import type {
+  BulkOptions,
+  BulkResponse,
+  PageParams,
+  PaginationMeta,
+} from "./common.js";
 
 /** One cart row. Variant fields are empty for simple products. */
 export interface CartLine {
@@ -28,6 +33,18 @@ export interface AddCartItemInput {
   /** Omit for the base product price; set for a specific SKU. */
   variant_id?: string;
   qty: number;
+}
+
+export interface BulkAddCartItemsInput extends BulkOptions {
+  items: AddCartItemInput[];
+}
+
+/**
+ * Bulk add result: per-line outcomes plus the full updated cart, so no
+ * follow-up GET is needed.
+ */
+export interface BulkAddCartItemsResponse extends BulkResponse<CartLine> {
+  cart: Cart;
 }
 
 export type CartSort =

@@ -13,14 +13,11 @@ export type UploadFile =
       type?: string;
     };
 
-/** Builds the `file` part expected by the admin image endpoints. */
-export function createUploadForm(file: UploadFile, field = "file"): FormData {
-  const form = new FormData();
-
+function appendFile(form: FormData, file: UploadFile, field: string): void {
   if (typeof Blob !== "undefined" && file instanceof Blob) {
     const name = typeof File !== "undefined" && file instanceof File ? file.name : "upload";
     form.append(field, file, name);
-    return form;
+    return;
   }
 
   if (
@@ -38,5 +35,26 @@ export function createUploadForm(file: UploadFile, field = "file"): FormData {
     type: file.type ?? "application/octet-stream",
   });
   form.append(field, blob, file.name);
+}
+
+/** Builds the single `file` part expected by the admin image endpoints. */
+export function createUploadForm(file: UploadFile, field = "file"): FormData {
+  const form = new FormData();
+  appendFile(form, file, field);
+  return form;
+}
+
+/** Builds repeated `files` parts for the gallery upload endpoint. */
+export function createUploadFormMany(
+  files: UploadFile | UploadFile[],
+  field = "files",
+): FormData {
+  const list = Array.isArray(files) ? files : [files];
+  if (list.length === 0) {
+    throw new TypeError("At least one UploadFile is required");
+  }
+
+  const form = new FormData();
+  for (const file of list) appendFile(form, file, field);
   return form;
 }

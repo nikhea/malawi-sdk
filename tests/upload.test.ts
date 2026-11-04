@@ -52,6 +52,30 @@ describe("image uploads", () => {
     expect(call?.init.body).toBeInstanceOf(FormData);
   });
 
+  it("posts repeated files for a product gallery", async () => {
+    const { store, recorder } = uploadStore();
+
+    await store.products.uploadImages("p1", [file, file]);
+
+    const [call] = recorder.calls;
+    expect(call?.url).toBe(`${BASE}/admin/products/p1/images`);
+    expect(call?.init.method).toBe("POST");
+    expect(call?.init.body).toBeInstanceOf(FormData);
+
+    const form = call?.init.body as FormData;
+    expect(form.getAll("files")).toHaveLength(2);
+    expect((form.getAll("files")[0] as File).name).toBe("photo.png");
+    expect(headerOf(call!.init, "content-type")).toBeUndefined();
+  });
+
+  it("rejects an empty gallery upload", async () => {
+    const { store } = uploadStore();
+
+    await expect(store.products.uploadImages("p1", [])).rejects.toBeInstanceOf(
+      TypeError,
+    );
+  });
+
   it("accepts a Blob directly", async () => {
     const { store, recorder } = uploadStore();
 

@@ -119,7 +119,8 @@ several parallel queries does not rotate the token multiple times.
 | `store.variants`      | SKU reads, admin CRUD, bulk create/update                           |
 | `store.cart`          | Get, add (single or bulk), update quantity, remove, clear           |
 | `store.inventory`     | Stock lookup (single or batch), bulk set, reserve/release/confirm   |
-| `store.orders`        | Checkout, list, get, cancel                                         |
+| `store.orders`        | Checkout, list, get, cancel, own + admin aggregates                 |
+| `store.dashboard`     | Admin-only whole-store overview                                     |
 | `store.payments`      | Stripe payment intents and hosted Checkout sessions                 |
 | `store.wishlist`      | List, add, remove, bulk heart/unheart                               |
 | `store.reviews`       | Product summary, own history, create, edit, delete, moderation      |
@@ -266,6 +267,17 @@ window.location.assign(checkout.url);
 const orders = await store.orders.list();
 const order = await store.orders.get(orderId);
 const cancelled = await store.orders.cancel(orderId); // pending orders only
+
+// Order + line-item totals in one request. Counts cover every matching row;
+// top_products is the top 10 by units sold. Money stays grouped by currency.
+const mine = await store.orders.aggregates({ status: "paid" });
+mine.orders.count;
+mine.items.revenue_by_currency;
+mine.items.top_products;
+
+// Admin: every customer, or narrow with a user_id UUID.
+const everyone = await store.orders.adminAggregates();
+const oneCustomer = await store.orders.adminAggregates({ user_id: customerId });
 ```
 
 ### Wishlist and reviews
@@ -340,6 +352,16 @@ await store.products.bulkCreate({
 const users = await store.users.list({ role: "customer", q: "aisha", sort: "newest" });
 const page = await store.users.listPage({ email_verified: false, page: 1, limit: 50 });
 page.meta.total; // matching accounts
+
+// Whole-store dashboard snapshot. Fulfillment comes from inventory
+// reservations (orders have no shipped/delivered state).
+const overview = await store.dashboard.overview();
+overview.customers.paying_customers;
+overview.orders.paid_revenue_by_currency;
+overview.fulfillment.active_reservations;
+overview.demand.most_ordered;   // top 5 by paid-order units
+overview.demand.most_wishlisted; // top 5 by wishlist hearts
+overview.demand.most_carted;     // top 5 by live-cart quantity
 ```
 
 ### Image uploads

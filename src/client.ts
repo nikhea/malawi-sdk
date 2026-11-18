@@ -7,6 +7,7 @@ import type {
 import { AuthResource } from "./resources/auth.js";
 import { CartResource } from "./resources/cart.js";
 import { CategoriesResource } from "./resources/categories.js";
+import { DashboardResource } from "./resources/dashboard.js";
 import { InventoryResource } from "./resources/inventory.js";
 import { OrdersResource } from "./resources/orders.js";
 import { PaymentsResource } from "./resources/payments.js";
@@ -33,6 +34,7 @@ export class MalawiStore {
   readonly auth: AuthResource;
   readonly users: UsersResource;
   readonly categories: CategoriesResource;
+  readonly dashboard: DashboardResource;
   readonly products: ProductsResource;
   readonly variants: VariantsResource;
   readonly cart: CartResource;
@@ -52,6 +54,7 @@ export class MalawiStore {
     this.auth = new AuthResource(this.http);
     this.users = new UsersResource(this.http);
     this.categories = new CategoriesResource(this.http);
+    this.dashboard = new DashboardResource(this.http);
     this.products = new ProductsResource(this.http);
     this.variants = new VariantsResource(this.http);
     this.cart = new CartResource(this.http);

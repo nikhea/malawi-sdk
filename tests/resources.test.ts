@@ -400,6 +400,21 @@ const cases: Case[] = [
     query: "status=paid&limit=12",
   },
   {
+    name: "orders.aggregates",
+    run: (s) => s.orders.aggregates({ status: "paid" }),
+    method: "GET",
+    path: "/orders/aggregates",
+    query: "status=paid",
+  },
+  {
+    name: "orders.adminAggregates",
+    run: (s) =>
+      s.orders.adminAggregates({ user_id: "u1", currency: "USD" }),
+    method: "GET",
+    path: "/admin/orders/aggregates",
+    query: "currency=USD&user_id=u1",
+  },
+  {
     name: "orders.get",
     run: (s) => s.orders.get("o1"),
     method: "GET",
@@ -410,6 +425,14 @@ const cases: Case[] = [
     run: (s) => s.orders.cancel("o1"),
     method: "POST",
     path: "/orders/o1/cancel",
+  },
+
+  // dashboard (admin)
+  {
+    name: "dashboard.overview",
+    run: (s) => s.dashboard.overview(),
+    method: "GET",
+    path: "/admin/dashboard/overview",
   },
 
   // payments

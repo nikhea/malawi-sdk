@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.3.0] - 2026-11-18
+
+### Added
+
+- `orders.aggregates()` — order + line-item totals for the current customer,
+  with status/currency buckets and the top 10 products by units sold.
+- `orders.adminAggregates()` — the same totals across all customers, with an
+  optional `user_id` UUID filter.
+- `store.dashboard.overview()` — admin-only whole-store snapshot with catalog,
+  customer, order, fulfillment, stock, review, payment and demand metrics.
+- Wire types for all three endpoints, exported through the package root.
+
 ## [0.2.0] - 2026-11-04
 
 ### Added

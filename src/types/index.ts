@@ -5,6 +5,7 @@ export * from "./categories.js";
 export * from "./products.js";
 export * from "./variants.js";
 export * from "./cart.js";
+export * from "./dashboard.js";
 export * from "./inventory.js";
 export * from "./orders.js";
 export * from "./payments.js";
